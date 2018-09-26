@@ -126,8 +126,13 @@ server <- function(input, output, session) {
       xml %>%
       xml_find_all("//aoi/thumbs") %>%
       xml_text()
+    
+    parallel <-
+      xml %>%
+      xml_find_all("//aoi/parallel") %>%
+      xml_text()
 
-    return(tibble(Name = name, Image = image, Shape = shape, Thumb = thumb))
+    return(tibble(Name = name, Image = image, Shape = shape, Thumb = thumb, Parallel = parallel))
   }
 
   # Modules

@@ -27,18 +27,7 @@ tabProcessingUI <- function(id) {
           actionButton(ns("last_month"), "Last Month")
         ),
         DTOutput(ns("table")),
-        div(
-          style = "display: inline-block; vertical-align:top; ",
-          actionButton(ns("calculate"), "Calculate")
-        ),
-        div(
-          style = "display: inline-block; vertical-align:top; ",
-          switchInput(ns("parallel"),
-            label = "Parallel",
-            value = FALSE,
-            size = "large"
-          )
-        )
+        actionButton(ns("calculate"), "Calculate")
       )
     ),
     column(
@@ -325,10 +314,10 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
             ".tif"
           )
 
-          if (input$parallel) {
+          if (tabAOIInput()$parallel() == "True") {
             # Parallel calculation with tsar package
             incProgress(0.2, detail = "Minimum")
-
+            
             tsar(s,
               workers = list(minimum = function(x) return(min(x, na.rm = T))),
               cores = 4,
