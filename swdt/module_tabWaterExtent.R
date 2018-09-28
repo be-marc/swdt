@@ -68,9 +68,9 @@ tabWaterExtentUI <- function(id) {
       ),
       panel(
         heading = "Statistics",
-        withSpinner(DTOutput(ns("statistics")),
-          type = 8,
-          color = "#008cba"
+        withSpinner(plotlyOutput(ns("pie")),
+                    type = 8,
+                    color = "#008cba"
         )
       )
     ),
@@ -332,57 +332,48 @@ tabWaterExtent <- function(input,
         options = layersControlOptions(collapsed = FALSE)
       )
   })
-
-  output$statistics <- renderDT({
-    #' Render table output with statistical measures
-    #'
+  
+  output$pie <- renderPlotly({
+    #' Render pie chart with statistical measures
+    #' 
     val <- raster::getValues(compute_water_extent())
     water_pixel <- tibble(Val = val) %>%
       filter(Val == 0) %>%
       summarise(Val = n()) %>%
       pull()
-
+    
     land_pixel <- tibble(Val = val) %>%
       filter(Val == 1) %>%
       summarise(Val = n()) %>%
       pull()
-
+    
     pixel_size <-
       compute_water_extent() %>%
       res()
-
-
-    tibble(Class = character(), Area = numeric(), Percentage = numeric()) %>%
+    
+    tibble(Class = character(), Area = numeric()) %>%
       add_row(
         Class = "Water",
-        Area = water_pixel * pixel_size[1] * pixel_size[2] * 0.0001,
-        Percentage = water_pixel / (water_pixel + land_pixel)
+        Area = round(water_pixel * pixel_size[1] * pixel_size[2] * 0.0001)
       ) %>%
       add_row(
         Class = "Land",
-        Area = land_pixel * pixel_size[1] * pixel_size[2] * 0.0001,
-        Percentage = land_pixel / (water_pixel + land_pixel)
-      ) %>%
-      datatable(
-        colnames = c("Class", "Area [ha]", "Area [%]"),
-        style = "bootstrap",
-        filter = "none",
-        selection = "none",
-        rownames = FALSE,
-        autoHideNavigation = TRUE,
-        options = list(
-          iDisplayLength = 10,
-          aLengthMenu = c(5, 10),
-          bLengthChange = 0,
-          bFilter = 0,
-          bInfo = 0,
-          bAutoWidth = 1,
-          ordering = FALSE,
-          bPaginate = FALSE
-        )
-      ) %>%
-      formatRound("Percentage", 2) %>%
-      formatRound("Area", 0)
+        Area = round(land_pixel * pixel_size[1] * pixel_size[2] * 0.0001)
+      ) -> data
+    
+    colors <- c('#008cba', 'rgb(128,133,133)')
+    
+    plot_ly(data, type = 'pie', labels = ~Class, values = ~Area,
+            textposition = 'inside',
+            textinfo = 'label+percent',
+            insidetextfont = list(color = '#FFFFFF'),
+            hoverinfo = 'text',
+            text = ~paste(Area, ' ha'),
+            marker = list(colors = colors,
+                          line = list(color = '#FFFFFF', width = 1)),
+            showlegend = FALSE) %>%
+      layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
   })
 
   sample_raster <- reactive({
@@ -444,7 +435,7 @@ tabWaterExtent <- function(input,
       ) +
       geom_vline(xintercept = pass_threshold(), size = 1)
   })
-
+  
   tabWaterExtentOutput <- reactive({
     #' Module ouput
     #'
@@ -452,6 +443,6 @@ tabWaterExtent <- function(input,
       water_extent = water_extent()
     )
   })
-
+  
   return(tabWaterExtentOutput)
 }

@@ -28,6 +28,7 @@ library(modeest)
 library(lubridate)
 library(bsplus)
 library(tools)
+library(plotly)
 
 # Navbar with text @daattali
 navbarPageWithText <- function(..., text) {
