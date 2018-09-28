@@ -435,7 +435,7 @@ tabWaterExtent <- function(input,
     # Plot histogram
     ggplot(compute_hist_data(), aes(x = dB)) +
       geom_histogram(binwidth = 0.5, fill = "#008cba", alpha = 0.8) +
-      xlab("dB") + ylab("Frequency") +
+      xlab("VH Polarization Backscatter [dB]") + ylab("Frequency") +
       theme(
         text = element_text(size = 14, family = "opensans"),
         panel.background = element_rect(fill = "#ffffff"),
