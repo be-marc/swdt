@@ -29,6 +29,7 @@ library(lubridate)
 library(bsplus)
 library(tools)
 library(plotly)
+library(RSQLite)
 
 # Navbar with text @daattali
 navbarPageWithText <- function(..., text) {
