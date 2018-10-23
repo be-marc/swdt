@@ -66,6 +66,7 @@ ui <- tagList(
     href = "lib/jquery/jquery-ui-1.10.3.custom.min.css"
   )),
   useShinyjs(),
+  includeScript("www/nav_right.js"),
   navbarPageWithText(
     id = "navbar",
     theme = "bootstrap.css",
@@ -235,6 +236,34 @@ server <- function(input, output, session) {
         modalDialog("No maximum water extent calculated.")
       )
     }
+  })
+  
+  observeEvent(input$nav_about, {
+    #' Show about modal
+    showModal(
+      modalDialog(shiny::includeMarkdown("modal/tab_about.md"), size = "l")
+    )
+  })
+  
+  observeEvent(input$nav_imprint, {
+    #' Show imprint modal
+    #'
+    showModal(
+      modalDialog(shiny::includeMarkdown("modal/tab_imprint.md"), size = "l")
+    )
+  })
+  
+  observeEvent(input$nav_data_protection, {
+    #' Show data protrection modal
+    #' 
+    showModal(
+      modalDialog(shiny::includeMarkdown("modal/tab_data_protection.md"), size = "l")
+    )
+  })
+  
+  observeEvent(input$restart_session, {
+    #' Restart session
+    session$reload()
   })
 
   output$text <- renderText({
