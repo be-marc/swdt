@@ -1,0 +1,1 @@
+This interface allows the creation of a water dynamics map based on the water extent maps.

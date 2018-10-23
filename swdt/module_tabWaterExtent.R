@@ -10,7 +10,7 @@ tabWaterExtentUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
-          content = "This interface allows the creation of water extent maps based on the minimum and maximum backscatter of the time series."
+          content = shiny::includeMarkdown("help/help_tabWaterExtent.md")
         ),
       tags$script(HTML(
         glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")

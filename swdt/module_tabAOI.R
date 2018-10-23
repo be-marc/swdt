@@ -10,7 +10,7 @@ tabAOIUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
-          content = "This interface allows the selection of an area of interests."
+          content = shiny::includeMarkdown("help/help_tabAOI.md")
         ),
       panel(
         heading = "AOI",

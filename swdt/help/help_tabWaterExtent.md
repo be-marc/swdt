@@ -1,0 +1,1 @@
+This interface allows the creation of water extent maps based on the minimum and maximum backscatter of the time series.

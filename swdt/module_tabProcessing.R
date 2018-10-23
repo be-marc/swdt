@@ -10,7 +10,7 @@ tabProcessingUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
-          content = "This interface allows the processing of Sentinel-1 time series to minimum and maximum backscatter raster files."
+          content = shiny::includeMarkdown("help/help_tabProcessing.md")
         ),
       tags$script(HTML(
         glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")

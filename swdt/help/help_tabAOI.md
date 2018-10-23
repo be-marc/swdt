@@ -1,0 +1,1 @@
+This interface allows the selection of an area of interests.

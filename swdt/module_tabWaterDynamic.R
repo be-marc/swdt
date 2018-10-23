@@ -10,7 +10,7 @@ tabWaterDynamicUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
-          content = "This interface allows the creation of a water dynamics map based on the water extent maps."
+          content = shiny::includeMarkdown("help/help_tabWaterDynamic.md")
         ),
       tags$script(HTML(
         glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")
