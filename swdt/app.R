@@ -32,16 +32,6 @@ library(plotly)
 library(RSQLite)
 library(rgdal)
 
-# Navbar with text @daattali
-navbarPageWithText <- function(..., text) {
-  navbar <- navbarPage(...)
-  textEl <- tags$p(class = "navbar-text", text)
-  navbar[[3]][[1]]$children[[1]] <- htmltools::tagAppendChild(
-    navbar[[3]][[1]]$children[[1]], textEl
-  )
-  navbar
-}
-
 # Source modules
 source("module_tabAOI.R")
 source("module_tabProcessing.R")
@@ -67,7 +57,7 @@ ui <- tagList(
   )),
   useShinyjs(),
   includeScript("www/nav_right.js"),
-  navbarPageWithText(
+  navbarPage(
     id = "navbar",
     theme = "bootstrap.css",
     "Sentinel-1 Water Dynamics Toolkit",
@@ -101,8 +91,7 @@ ui <- tagList(
       id = "water_dynamic",
       value = "water_dynamic",
       tabWaterDynamicUI("tabWaterDynamic")
-    ),
-    text = textOutput("text", inline = TRUE)
+    )
   ),
   tags$script(src = "navigation_modal.js")
 )
@@ -264,13 +253,6 @@ server <- function(input, output, session) {
   observeEvent(input$restart_session, {
     #' Restart session
     session$reload()
-  })
-
-  output$text <- renderText({
-    #' Add session info to navbar
-    #'
-    req(tabAOIOutput()$uuid())
-    tabAOIOutput()$uuid()
   })
 }
 
