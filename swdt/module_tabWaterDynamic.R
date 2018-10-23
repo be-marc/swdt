@@ -117,7 +117,18 @@ tabWaterDynamic <- function(input,
          strftime(tabProcessingInput()$end_date(), "%Y-%m-%d"),
          ".tif"),
     content = function(file) {
-      writeRaster(water_dynamic_map(), file, format = "GTiff")
+      # Create color map
+      color_table <- tibble(class = c(0, 1, 2),
+                            color = c(input$color_class_2, 
+                                      input$color_class_1,
+                                      input$color_class_0))
+      
+      # Write raster
+      writeGDAL(as(water_dynamic_map(), 'SpatialGridDataFrame'), 
+                file, 
+                colorTables = list(color_table$color), 
+                mvFlag = 255,
+                type="Byte")
     },
     contentType = "image/tiff"
   )
