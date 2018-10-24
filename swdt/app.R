@@ -28,18 +28,9 @@ library(modeest)
 library(lubridate)
 library(bsplus)
 library(tools)
+library(plotly)
 library(RSQLite)
 library(rgdal)
-
-# Navbar with text @daattali
-navbarPageWithText <- function(..., text) {
-  navbar <- navbarPage(...)
-  textEl <- tags$p(class = "navbar-text", text)
-  navbar[[3]][[1]]$children[[1]] <- htmltools::tagAppendChild(
-    navbar[[3]][[1]]$children[[1]], textEl
-  )
-  navbar
-}
 
 # Source modules
 source("module_tabAOI.R")
@@ -65,7 +56,8 @@ ui <- tagList(
     href = "lib/jquery/jquery-ui-1.10.3.custom.min.css"
   )),
   useShinyjs(),
-  navbarPageWithText(
+  includeScript("www/nav_right.js"),
+  navbarPage(
     id = "navbar",
     theme = "bootstrap.css",
     "Sentinel-1 Water Dynamics Toolkit",
@@ -99,8 +91,7 @@ ui <- tagList(
       id = "water_dynamic",
       value = "water_dynamic",
       tabWaterDynamicUI("tabWaterDynamic")
-    ),
-    text = textOutput("text", inline = TRUE)
+    )
   ),
   tags$script(src = "navigation_modal.js")
 )
@@ -128,8 +119,13 @@ server <- function(input, output, session) {
       xml %>%
       xml_find_all("//aoi/thumbs") %>%
       xml_text()
+    
+    parallel <-
+      xml %>%
+      xml_find_all("//aoi/parallel") %>%
+      xml_text()
 
-    return(tibble(Name = name, Image = image, Shape = shape, Thumb = thumb))
+    return(tibble(Name = name, Image = image, Shape = shape, Thumb = thumb, Parallel = parallel))
   }
 
   # Modules
@@ -230,12 +226,33 @@ server <- function(input, output, session) {
       )
     }
   })
-
-  output$text <- renderText({
-    #' Add session info to navbar
+  
+  observeEvent(input$nav_about, {
+    #' Show about modal
+    showModal(
+      modalDialog(shiny::includeMarkdown("modal/tab_about.md"), size = "l")
+    )
+  })
+  
+  observeEvent(input$nav_imprint, {
+    #' Show imprint modal
     #'
-    req(tabAOIOutput()$uuid())
-    tabAOIOutput()$uuid()
+    showModal(
+      modalDialog(shiny::includeMarkdown("modal/tab_imprint.md"), size = "l")
+    )
+  })
+  
+  observeEvent(input$nav_data_protection, {
+    #' Show data protrection modal
+    #' 
+    showModal(
+      modalDialog(shiny::includeMarkdown("modal/tab_data_protection.md"), size = "l")
+    )
+  })
+  
+  observeEvent(input$restart_session, {
+    #' Restart session
+    session$reload()
   })
 }
 

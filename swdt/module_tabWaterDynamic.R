@@ -10,7 +10,7 @@ tabWaterDynamicUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
-          content = "This interface allows the creation of a water dynamics map based on the water extent maps."
+          content = shiny::includeMarkdown("help/help_tabWaterDynamic.md")
         ),
       tags$script(HTML(
         glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")
@@ -115,9 +115,32 @@ tabWaterDynamic <- function(input,
          strftime(tabProcessingInput()$start_date(), "%Y-%m-%d"), 
          "_", 
          strftime(tabProcessingInput()$end_date(), "%Y-%m-%d"),
+         "_", 
+         tabWaterExtentMinimumInput()$threshold(),
+         "_",
+         tabWaterExtentMinimumInput()$filter,
+         "_", 
+         tabWaterExtentMinimumInput()$filter_size(),
+         "_", 
+         tabWaterExtentMaximumInput()$threshold(),
+         "_",
+         tabWaterExtentMaximumInput()$filter,
+         "_", 
+         tabWaterExtentMaximumInput()$filter_size(),
          ".tif"),
     content = function(file) {
-      writeRaster(water_dynamic_map(), file, format = "GTiff")
+      # Create color map
+      color_table <- tibble(class = c(0, 1, 2),
+                            color = c(input$color_class_2, 
+                                      input$color_class_1,
+                                      input$color_class_0))
+      
+      # Write raster
+      writeGDAL(as(water_dynamic_map(), 'SpatialGridDataFrame'), 
+                file, 
+                colorTables = list(color_table$color), 
+                mvFlag = 255,
+                type="Byte")
     },
     contentType = "image/tiff"
   )

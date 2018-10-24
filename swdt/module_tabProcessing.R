@@ -10,7 +10,7 @@ tabProcessingUI <- function(id) {
         bsplus::bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bsplus::bs_append(
           title = "Help",
-          content = "This interface allows the processing of Sentinel-1 time series to minimum and maximum backscatter raster files."
+          content = shiny::includeMarkdown("help/help_tabProcessing.md")
         ),
       shiny::tags$script(shiny::HTML(
         glue::glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")
@@ -27,18 +27,7 @@ tabProcessingUI <- function(id) {
           shiny::actionButton(ns("last_month"), "Last Month")
         ),
         DT::DTOutput(ns("table")),
-        shiny::div(
-          style = "display: inline-block; vertical-align:top; ",
-          shiny::actionButton(ns("calculate"), "Calculate")
-        ),
-        shiny::div(
-          style = "display: inline-block; vertical-align:top; ",
-          shinyWidgets::switchInput(ns("parallel"),
-                                    label = "Parallel",
-                                    value = FALSE,
-                                    size = "large"
-          )
-        )
+        shiny::actionButton(ns("calculate"), "Calculate")
       )
     ),
     shiny::column(
@@ -325,9 +314,9 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
             ".tif"
           )
           
-          if (input$parallel) {
+          if (tabAOIInput()$parallel() == "True") {
             # Parallel calculation with tsar package
-            shiny::incProgress(0.2, detail = "Minimum")
+            incProgress(0.2, detail = "Minimum")
             
             tsar::tsar(s,
                        workers = list(minimum = function(x) return(min(x, na.rm = T))),

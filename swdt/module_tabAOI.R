@@ -10,7 +10,7 @@ tabAOIUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
-          content = "This interface allows the selection of an area of interests."
+          content = shiny::includeMarkdown("help/help_tabAOI.md")
         ),
       panel(
         heading = "AOI",
@@ -90,6 +90,7 @@ tabAOI <- function(input, output, session, config, app_session) {
   image_path <- reactiveVal(NULL)
   shape_path <- reactiveVal(NULL)
   thumb_path <- reactiveVal(NULL)
+  parallel <- reactiveVal(NULL)
 
   observeEvent(input$start_session, {
     #' Starts Session
@@ -119,7 +120,13 @@ tabAOI <- function(input, output, session, config, app_session) {
       dplyr::select(Thumb) %>%
       pull() %>%
       thumb_path()
-
+    
+    aoi_data() %>%
+      filter(Name == input$aoi) %>%
+      dplyr::select(Parallel) %>%
+      pull() %>%
+      parallel
+      
     # Change to processing tab
     updateTabsetPanel(app_session, inputId = "navbar", selected = "processing")
 
@@ -179,7 +186,8 @@ tabAOI <- function(input, output, session, config, app_session) {
       shape_aoi = shape_aoi,
       image_path = image_path,
       shape_path = shape_path,
-      thumb_path = thumb_path
+      thumb_path = thumb_path,
+      parallel = parallel
     )
   })
 
