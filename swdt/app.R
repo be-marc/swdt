@@ -28,6 +28,8 @@ library(modeest)
 library(lubridate)
 library(bsplus)
 library(tools)
+library(RSQLite)
+library(rgdal)
 
 # Navbar with text @daattali
 navbarPageWithText <- function(..., text) {
