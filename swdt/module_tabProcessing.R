@@ -300,6 +300,10 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
             strftime(end_date(), "%Y-%m-%d"),
             ".tif"
           )
+          
+          if(!dir.exists(dirname(path_min))) {
+            dir.create(dirname(path_min))
+          }
 
           path_max <- glue(
             tabAOIInput()$image_path(),
@@ -313,6 +317,10 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
             strftime(end_date(), "%Y-%m-%d"),
             ".tif"
           )
+          
+          if(!dir.exists(dirname(path_max))) {
+            dir.create(dirname(path_max))
+          }
 
           if (tabAOIInput()$parallel() == "True") {
             # Parallel calculation with tsar package
