@@ -49,12 +49,12 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
   files <- reactive({
     #' Creates data table with available Sentinel-1 scenes
     #'
-    files <- list.files(tabAOIInput()$image_path(), "^S1")
+    files <- list.files(tabAOIInput()$image_path(), "^S1.*\\.tif")
     paths <- list.files(tabAOIInput()$image_path(),
-      "^S1",
+      "^S1.*\\.tif",
       full.names = TRUE
     )
-    thumbs <- list.files(tabAOIInput()$thumb_path(), "^S1")
+    thumbs <- list.files(tabAOIInput()$thumb_path(), "^S1.*\\.png")
     thumbs <-
       str_sub(tabAOIInput()$thumb_path(), 7) %>%
       paste0("/", thumbs)
