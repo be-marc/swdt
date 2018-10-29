@@ -150,7 +150,7 @@ tabAOI <- function(input, output, session, config, app_session) {
       basename(path) %>%
       file_path_sans_ext()
 
-    read_sf(dsn, layer) %>%
+    readOGR(dsn, layer) %>%
       shape_aoi()
   })
 
