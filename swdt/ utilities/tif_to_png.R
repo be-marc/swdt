@@ -3,6 +3,7 @@
 library(tools)
 library(raster)
 library(rgdal)
+library(glue)
 
 # Config
 in_path <- "./data/fuente"
