@@ -85,3 +85,20 @@
 .modebar{
       display: none !important;
 }
+
+/* Set leaflet map height to screen height */
+#tabAOI-map {
+  height: calc(100vh - 80px) !important;
+}
+
+#tabWaterExtentMinimum-map {
+  height: calc(100vh - 80px) !important;
+}
+
+#tabWaterExtentMaximum-map {
+  height: calc(100vh - 80px) !important;
+}
+
+#tabWaterDynamic-map {
+  height: calc(100vh - 80px) !important;
+}

@@ -21,10 +21,6 @@ tabAOIUI <- function(id) {
     ),
     column(
       9,
-      tags$style(
-        type = "text/css",
-        "#tabAOI-map {height: calc(100vh - 80px) !important;}"
-      ),
       leafletOutput(ns("map"), height = 700, width = "100%")
     )
   )

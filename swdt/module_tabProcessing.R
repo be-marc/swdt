@@ -12,9 +12,6 @@ tabProcessingUI <- function(id) {
           title = "Help",
           content = shiny::includeMarkdown("help/help_tabProcessing.md")
         ),
-      tags$script(HTML(
-        glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")
-      )),
       panel(
         heading = "Filter",
         uiOutput(ns("date_range")),
@@ -195,13 +192,9 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       raster() %>%
       projectRaster(crs = crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ")) %>%
       extent()
-
-    glue(
-      "[[", extent_raster@ymin,
-      ", ", extent_raster@xmin,
-      "], [", extent_raster@ymax, ", ",
-      extent_raster@xmax, "]]"
-    )
+    
+    
+    c(extent_raster@ymin, extent_raster@xmin, extent_raster@ymax, extent_raster@xmax)
   })
 
   output$map <- renderLeaflet({
@@ -217,19 +210,19 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     if (is.null(input$table_row_last_clicked)) {
       map
     } else {
-      r <-
+      png <-
         files() %>%
         slice(input$table_row_last_clicked) %>%
         dplyr::select(thumbs) %>%
         pull()
-
+    
       map %>%
-        htmlwidgets::onRender(paste0("function(el, x) {
-                                 var map = this;
-                                 var imageUrl = \'", r, "\';
-                                 var imageBounds = ", thumb_extent(), ";
-                                 L.imageOverlay(imageUrl, imageBounds).addTo(map);
-    }"))
+        htmlwidgets::onRender("function(el, x, data) {
+          var map = this;
+          var imageUrl = data.png;
+          var imageBounds = [[data.thumb_extent[0], data.thumb_extent[1]], [data.thumb_extent[2], data.thumb_extent[3]]];
+          L.imageOverlay(imageUrl, imageBounds).addTo(map);
+        }", data = list(png = png, thumb_extent = thumb_extent()))
     }
   })
 
@@ -441,6 +434,12 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     #'
     removeModal()
     updateTabsetPanel(app_session, inputId = "navbar", selected = "water_extent_minimum")
+  })
+  
+  observe({
+    #' Close help accordion
+    #' 
+    session$sendCustomMessage("close", session$ns(""))
   })
 
   tabProcessingOutput <- reactive({

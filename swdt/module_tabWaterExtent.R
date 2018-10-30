@@ -12,9 +12,6 @@ tabWaterExtentUI <- function(id) {
           title = "Help",
           content = shiny::includeMarkdown("help/help_tabWaterExtent.md")
         ),
-      tags$script(HTML(
-        glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")
-      )),
       panel(
         heading = "Classification",
         div(
@@ -76,11 +73,6 @@ tabWaterExtentUI <- function(id) {
     ),
     column(
       8,
-      tags$style(
-        type = "text/css",
-        "#tabWaterExtentMinimum-map {height: calc(100vh - 80px) !important;}
-        #tabWaterExtentMaximum-map {height: calc(100vh - 80px) !important;}"
-      ),
       withSpinner(leafletOutput(ns("map"), height = 700, width = "100%"),
         type = 8,
         color = "#008cba"
@@ -300,6 +292,7 @@ tabWaterExtent <- function(input,
         colors = pal,
         project = FALSE,
         group = "Classified",
+        layerId = "Classified",
         opacity = 1
       ) %>%
       addRasterImage(stretch_radar(),
@@ -308,16 +301,14 @@ tabWaterExtent <- function(input,
         group = "Radar",
         opacity = 1
       ) %>%
-      onRender("function(el,x,data){
-               var map = this;
-               var labels = map.layerManager._byGroup.Classified;
-               var opacitySlider = new L.Control.opacitySlider();
-               
-               for (const prop in labels) {
-               opacitySlider.setOpacityLayer(labels[prop]);
-               }
-               
-               map.addControl(opacitySlider);}") %>%
+      htmlwidgets::onRender("function(el,x,data){
+          var map = this;
+          var opacitySlider = new L.Control.opacitySlider();
+          var opacityLayer = map.layerManager.getLayer('image', data.layerId)
+
+          opacitySlider.setOpacityLayer(opacityLayer);
+          map.addControl(opacitySlider);
+        }", data = list(layerId = "Classified")) %>%
       addLegend(
         position = "topright",
         pal = pal, values = c(0, 1),
@@ -434,6 +425,12 @@ tabWaterExtent <- function(input,
         axis.ticks = element_blank()
       ) +
       geom_vline(xintercept = pass_threshold(), size = 1)
+  })
+  
+  observe({
+    #' Close help accordion
+    #' 
+    session$sendCustomMessage("close", session$ns(""))
   })
   
   tabWaterExtentOutput <- reactive({

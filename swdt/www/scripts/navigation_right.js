@@ -1,4 +1,4 @@
-$.get("nav_right.html", function(data) {
+$.get("scripts/navigation_right.html", function(data) {
     $(".navbar > .container-fluid").append(data);
   
 });
