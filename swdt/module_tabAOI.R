@@ -11,7 +11,11 @@ tabAOIUI <- function(id) {
         bs_append(
           title = "Help",
           content = shiny::includeHTML(
-            render('help/help_tabAOI.md', html_document(template = 'pandoc_template.html'))
+            suppressWarnings(
+              render('help/help_tabAOI.md', 
+                   html_document(template = 'pandoc_template.html'), 
+                   quiet = TRUE)
+              )
             )
         ),
       panel(
@@ -35,8 +39,8 @@ tabAOI <- function(input, output, session, config, app_session) {
   })
 
   aoi_data <- reactiveVal(NULL)
-
-  observe({
+  
+  observe({ 
     #' Check configuration file
     #'
     true_config <-
@@ -44,8 +48,8 @@ tabAOI <- function(input, output, session, config, app_session) {
       filter(dir.exists(Image))
 
     false_config <-
-      setdiff(config, true_config)
-
+      suppressWarnings(setdiff(config, true_config))
+    
     # Validation
     if (nrow(true_config) == 0) {
       showModal(
@@ -53,13 +57,13 @@ tabAOI <- function(input, output, session, config, app_session) {
       )
     } else {
       aoi_data(true_config)
-
+      
       if (nrow(false_config) > 0) {
         false_names <-
           false_config %>%
           dplyr::select(Name) %>%
           pull()
-
+        
         showModal(
           modalDialog(glue(
             "No valid path in configuration file for aoi ",
@@ -70,7 +74,7 @@ tabAOI <- function(input, output, session, config, app_session) {
     }
   })
 
-  output$aoi <- renderUI({
+  output$aoi <- renderUI({ 
     #' Render aoi selection
     #'
     if (is.null(aoi_data())) {
@@ -90,7 +94,7 @@ tabAOI <- function(input, output, session, config, app_session) {
   thumb_path <- reactiveVal(NULL)
   parallel <- reactiveVal(NULL)
 
-  observeEvent(input$start_session, {
+  observeEvent(input$start_session, { 
     #' Starts Session
     #'
     req(input$aoi)
@@ -133,7 +137,7 @@ tabAOI <- function(input, output, session, config, app_session) {
 
   shape_aoi <- reactiveVal(NULL)
 
-  observeEvent(input$aoi, {
+  observeEvent(input$aoi, { 
     #' Read shapefile
     #'
     req(input$aoi)
@@ -148,11 +152,11 @@ tabAOI <- function(input, output, session, config, app_session) {
       basename(path) %>%
       file_path_sans_ext()
 
-    readOGR(dsn, layer) %>%
+    readOGR(dsn, layer, verbose = FALSE) %>%
       shape_aoi()
   })
 
-  output$map <- renderLeaflet({
+  output$map <- renderLeaflet({ 
     #' Render leaflet map
     #'
     req(input$aoi)
@@ -171,11 +175,11 @@ tabAOI <- function(input, output, session, config, app_session) {
     }
   })
 
-  observeEvent(input$restart_session, {
+  observeEvent(input$restart_session, { 
     session$reload()
   })
 
-  tabAOIOutput <- reactive({
+  tabAOIOutput <- reactive({ 
     #' Module output
     #'
     list(

@@ -11,7 +11,11 @@ tabProcessingUI <- function(id) {
         bs_append(
           title = "Help",
           content = shiny::includeHTML(
-            render('help/help_tabProcessing.md', html_document(template = 'pandoc_template.html'))
+            suppressWarnings(
+              render('help/help_tabProcessing.md', 
+                   html_document(template = 'pandoc_template.html'),
+                   quiet = TRUE)
+              )
             )
         ),
       panel(
@@ -57,7 +61,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     thumbs <-
       str_sub(tabAOIInput()$thumb_path(), 7) %>%
       paste0("/", thumbs)
-
+    
     as_tibble(files) %>%
       separate(value,
         c("Mission", "Mode", "E", "Date", "Polarisation"),
@@ -72,7 +76,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       cbind(paths) %>%
       cbind(thumbs) %>%
       mutate_if(is.factor, as.character) %>%
-      arrange(Date)
+      arrange(Date) 
   })
 
   start_date <- reactiveVal()
@@ -98,7 +102,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     day(min_date) <- 1
 
     start_date(min_date)
-
+    
     dateRangeInput(session$ns("date_range"),
       label = "Date Range",
       start = isolate(start_date()),
@@ -249,7 +253,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
         con <- dbConnect(RSQLite::SQLite(),
           dbname = "./database/swdt.sqlite"
         )
-
+        browser()
         # Create table if missing
         if (length(dbListTables(con)) == 0) {
           dbGetQuery(con, "CREATE TABLE temporal_statistic(
@@ -261,7 +265,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
                              path_min TEXT,
                              path_max TEXT)")
         }
-
+        browser()
         # Search for cached data
         res <- dbGetQuery(con, glue(
           "SELECT * FROM temporal_statistic WHERE start_time = \'",

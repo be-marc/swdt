@@ -11,9 +11,13 @@ tabWaterExtentUI <- function(id) {
         bs_append(
           title = "Help",
           content = shiny::includeHTML(
-            render('help/help_tabWaterExtent.md', html_document(template = 'pandoc_template.html'))
-          )
-        ),
+            suppressWarnings(
+              render('help/help_tabWaterExtent.md', 
+                   html_document(template = 'pandoc_template.html'), 
+                   quiet = TRUE)
+              )
+            )
+          ),
       panel(
         heading = "Classification",
         div(
