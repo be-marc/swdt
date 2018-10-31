@@ -10,7 +10,9 @@ tabWaterExtentUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
-          content = shiny::includeMarkdown("help/help_tabWaterExtent.md")
+          content = shiny::includeHTML(
+            render('help/help_tabWaterExtent.md', html_document(template = 'pandoc_template.html'))
+          )
         ),
       panel(
         heading = "Classification",

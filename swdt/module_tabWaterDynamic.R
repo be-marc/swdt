@@ -10,7 +10,9 @@ tabWaterDynamicUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
-          content = shiny::includeMarkdown("help/help_tabWaterDynamic.md")
+          content = shiny::includeHTML(
+            render('help/help_tabWaterDynamic.md', html_document(template = 'pandoc_template.html'))
+            )
         ),
       panel(
         heading = "Visualization",

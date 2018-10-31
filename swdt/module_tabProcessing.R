@@ -10,7 +10,9 @@ tabProcessingUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
-          content = shiny::includeMarkdown("help/help_tabProcessing.md")
+          content = shiny::includeHTML(
+            render('help/help_tabProcessing.md', html_document(template = 'pandoc_template.html'))
+            )
         ),
       panel(
         heading = "Filter",

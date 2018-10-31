@@ -238,7 +238,10 @@ server <- function(input, output, session) {
     #' Javascript: /www/scripts/navigation_right.js
     #' 
     showModal(
-      modalDialog(shiny::includeMarkdown("modal/tab_about.md"), size = "l")
+      modalDialog(shiny::includeHTML(
+        render('modal/tab_about.md', 
+               html_document(template = 'pandoc_template.html'))), 
+        size = "l")
     )
   })
   
@@ -247,7 +250,10 @@ server <- function(input, output, session) {
     #' Javascript: /www/scripts/navigation_right.js
     #'
     showModal(
-      modalDialog(shiny::includeMarkdown("modal/tab_imprint.md"), size = "l")
+      modalDialog(shiny::includeHTML(
+        render('modal/tab_imprint.md', 
+               html_document(template = 'pandoc_template.html'))), 
+        size = "l")
     )
   })
   
@@ -256,7 +262,10 @@ server <- function(input, output, session) {
     #' Javascript: /www/scripts/navigation_right.js
     #' 
     showModal(
-      modalDialog(shiny::includeMarkdown("modal/tab_data_protection.md"), size = "l")
+      modalDialog(shiny::includeHTML(
+        render('modal/tab_data_protection.md', 
+               html_document(template = 'pandoc_template.html'))), 
+        size = "l")
     )
   })
   
