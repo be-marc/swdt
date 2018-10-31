@@ -175,7 +175,9 @@ tabAOI <- function(input, output, session, config, app_session) {
     }
   })
 
-  observeEvent(input$restart_session, { 
+  observeEvent(input$restart_session, {
+    #' Restart session
+    #' 
     session$reload()
   })
 

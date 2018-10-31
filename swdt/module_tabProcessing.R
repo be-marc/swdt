@@ -199,7 +199,6 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       projectRaster(crs = crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ")) %>%
       extent()
     
-    
     c(extent_raster@ymin, extent_raster@xmin, extent_raster@ymax, extent_raster@xmax)
   })
 
