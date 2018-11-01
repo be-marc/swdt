@@ -14,11 +14,11 @@ tabProcessingUI <- function(id) {
           content = shiny::includeHTML(
             suppressWarnings(
               render('help/help_tabProcessing.md', 
-                   html_document(template = 'pandoc_template.html'),
-                   quiet = TRUE)
-              )
+                     html_document(template = 'pandoc_template.html'),
+                     quiet = TRUE)
             )
-          ),
+          )
+        ),
       panel(
         heading = "Filter",
         shiny::uiOutput(ns("date_range")),
@@ -55,8 +55,8 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     #'
     files <- list.files(tabAOIInput()$image_path(), "^S1.*\\.tif$")
     paths <- list.files(tabAOIInput()$image_path(),
-      "^S1.*\\.tif$",
-      full.names = TRUE
+                        "^S1.*\\.tif$",
+                        full.names = TRUE
     )
     thumbs <- list.files(tabAOIInput()$thumb_path(), "^S1.*\\.png$")
     thumbs <-
@@ -65,10 +65,10 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     
     tibble::as_tibble(files) %>%
       tidyr::separate(value,
-        c("Mission", "Mode", "E", "Date", "Polarisation"),
-        "_+",
-        extra = "drop",
-        fill = "right"
+                      c("Mission", "Mode", "E", "Date", "Polarisation"),
+                      "_+",
+                      extra = "drop",
+                      fill = "right"
       ) %>%
       dplyr::select(-one_of("E")) %>%
       mutate(Date = str_sub(Date, 1, 8)) %>%
@@ -105,10 +105,10 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     start_date(min_date)
     
     shiny::dateRangeInput(session$ns("date_range"),
-      label = "Date Range",
-      start = isolate(start_date()),
-      end = isolate(end_date()),
-      language = "de"
+                          label = "Date Range",
+                          start = isolate(start_date()),
+                          end = isolate(end_date()),
+                          language = "de"
     )
   })
   
@@ -302,7 +302,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
           if(!dir.exists(dirname(path_min))) {
             dir.create(dirname(path_min))
           }
-
+          
           path_max <- glue(
             tabAOIInput()$image_path(),
             "/maximum/maximum-",
@@ -319,7 +319,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
           if(!dir.exists(dirname(path_max))) {
             dir.create(dirname(path_max))
           }
-
+          
           if (tabAOIInput()$parallel() == "True") {
             # Parallel calculation with tsar package
             incProgress(0.2, detail = "Minimum")
