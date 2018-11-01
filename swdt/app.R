@@ -50,7 +50,6 @@ ui <- tagList(
   includeScript("www/scripts/jquery-ui-1.10.3.custom.min.js"),
   includeScript("www/scripts/navigation_right.js"),
   includeScript("www/scripts/navigation_modal.js"),
-  includeScript("www/scripts/help_accordion.js"),
   useShinyjs(),
   navbarPage(
     id = "navbar",

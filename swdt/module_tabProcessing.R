@@ -10,6 +10,7 @@ tabProcessingUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
+          show = FALSE,
           content = shiny::includeHTML(
             suppressWarnings(
               render('help/help_tabProcessing.md', 
@@ -17,7 +18,7 @@ tabProcessingUI <- function(id) {
                    quiet = TRUE)
               )
             )
-        ),
+          ),
       panel(
         heading = "Filter",
         uiOutput(ns("date_range")),
@@ -439,12 +440,6 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     #'
     removeModal()
     updateTabsetPanel(app_session, inputId = "navbar", selected = "water_extent_minimum")
-  })
-  
-  observe({
-    #' Close help accordion
-    #' 
-    session$sendCustomMessage("close", session$ns(""))
   })
 
   tabProcessingOutput <- reactive({

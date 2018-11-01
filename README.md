@@ -12,17 +12,20 @@ the Department of Geography at Friedrich-Schiller University Jena.
 ### Installation
 
 You can download the whole application with demo data from Github and
-restore the missing packages with `packrat`.
+restore the missing packages with `packrat`. Note that SWDT depends on
+[`tsar`](https://github.com/johntruckenbrodt/tsar) and a
+[`bsplus`](https://github.com/be-marc/bsplus) fork, which have to be
+installed from GitHub.
 
 ### Data
 
 Adding your own data involves several steps at the moment.
 
   - Pre-processing of Sentinel-1 GRD images with the
-    [pyroSAR](https://github.com/johntruckenbrodt/pyroSAR) python
+    [`pyroSAR`](https://github.com/johntruckenbrodt/pyroSAR) python
     library
   - Projection to EPSG 3857 and same extent
-  - Supplying an area of interest as a shapefile in EPSG 3857
+  - Supplying an area of interest as a shapefile in EPSG 4326
   - Converting of the pre-processed Sentinel-1 images to png files
     (utilities/tif\_to\_png.R)
 

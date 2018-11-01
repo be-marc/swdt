@@ -10,6 +10,7 @@ tabWaterExtentUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
+          show = FALSE,
           content = shiny::includeHTML(
             suppressWarnings(
               render('help/help_tabWaterExtent.md', 
@@ -431,12 +432,6 @@ tabWaterExtent <- function(input,
         axis.ticks = element_blank()
       ) +
       geom_vline(xintercept = pass_threshold(), size = 1)
-  })
-  
-  observe({
-    #' Close help accordion
-    #' 
-    session$sendCustomMessage("close", session$ns(""))
   })
   
   tabWaterExtentOutput <- reactive({

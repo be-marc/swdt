@@ -94,11 +94,19 @@ Hash: 532700d8073e660dce40a984900bc647
 Requires: prettyunits
 
 Package: bsplus
-Source: CRAN
-Version: 0.1.1
-Hash: 9b1f91fb68fb86b5444476d543fd819a
-Requires: glue, htmltools, lubridate, magrittr, purrr, rmarkdown,
-    stringr
+Source: github
+Version: 0.1.1.9000
+Hash: d9f0f31162f241ddab11a78f1cf3944f
+Requires: glue, htmltools, jsonlite, lubridate, magrittr, purrr,
+    rmarkdown, stringr
+GithubRepo: bsplus
+GithubUsername: be-marc
+GithubRef: master
+GithubSha1: e1aab0dccac15c2b6b6cb0b5ab26ddbac24ea8c7
+RemoteHost: api.github.com
+RemoteRepo: bsplus
+RemoteUsername: be-marc
+RemoteSha: e1aab0dccac15c2b6b6cb0b5ab26ddbac24ea8c7
 
 Package: callr
 Source: CRAN
@@ -197,6 +205,11 @@ Package: e1071
 Source: CRAN
 Version: 1.7-0
 Hash: 54c6b974d385e3c0961eb4cefc9ea0c5
+
+Package: enc
+Source: CRAN
+Version: 0.2.0
+Hash: d7625df773f4a18ffb69ed0961f720d7
 
 Package: evaluate
 Source: CRAN
@@ -477,6 +490,12 @@ Hash: fa393406ee13ce387bc4eae82407c34a
 Requires: R6, callr, cli, crayon, desc, digest, pkgbuild, prettyunits,
     rprojroot, withr, xopen
 
+Package: rematch2
+Source: CRAN
+Version: 2.0.1
+Hash: b7f86a340a404c69cfb770dfd2081dd9
+Requires: tibble
+
 Package: remotes
 Source: CRAN
 Version: 2.0.2
@@ -496,8 +515,8 @@ Requires: sp
 
 Package: rlang
 Source: CRAN
-Version: 0.3.0
-Hash: 14e2b2e471fd3f38e060517411a108ca
+Version: 0.3.0.1
+Hash: 35fb7a51d5d756c56f793ed9c381fb84
 
 Package: rmarkdown
 Source: CRAN
@@ -602,6 +621,13 @@ Source: CRAN
 Version: 1.3.1
 Hash: 9f417a1d899ed1f080942ab36998e8b5
 Requires: glue, magrittr, stringi
+
+Package: styler
+Source: CRAN
+Version: 1.0.2
+Hash: a803f5288519f928124d6305af477120
+Requires: backports, cli, enc, magrittr, purrr, rematch2, rlang,
+    rprojroot, tibble, withr
 
 Package: sysfonts
 Source: CRAN
