@@ -14,7 +14,7 @@ tabProcessingUI <- function(id) {
           content = shiny::includeHTML(
             suppressWarnings(
               render('help/help_tabProcessing.md', 
-                   html_document(template = 'pandoc_template.html'),
+                   html_document(template = paste0(getwd(), '/template/pandoc_template.html')),
                    quiet = TRUE)
               )
             )

@@ -14,8 +14,8 @@ tabWaterExtentUI <- function(id) {
           content = shiny::includeHTML(
             suppressWarnings(
               render('help/help_tabWaterExtent.md', 
-                   html_document(template = 'pandoc_template.html'), 
-                   quiet = TRUE)
+                     html_document(template = paste0(getwd(), '/template/pandoc_template.html')),
+                     quiet = TRUE)
               )
             )
           ),

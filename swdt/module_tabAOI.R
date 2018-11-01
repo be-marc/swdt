@@ -13,7 +13,7 @@ tabAOIUI <- function(id) {
           content = shiny::includeHTML(
             suppressWarnings(
               render('help/help_tabAOI.md', 
-                   html_document(template = 'pandoc_template.html'), 
+                   html_document(template = paste0(getwd(), '/template/pandoc_template.html')),
                    quiet = TRUE)
               )
             )
