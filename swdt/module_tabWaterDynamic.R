@@ -10,11 +10,15 @@ tabWaterDynamicUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
-          content = shiny::includeMarkdown("help/help_tabWaterDynamic.md")
+          show = FALSE,
+          content = shiny::includeHTML(
+            suppressWarnings(
+              render('help/help_tabWaterDynamic.md', 
+                   html_document(template = 'pandoc_template.html'), 
+                   quiet = TRUE)
+              )
+            )
         ),
-      tags$script(HTML(
-        glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")
-      )),
       panel(
         heading = "Visualization",
         colourInput(ns("color_class_0"), "Never flooded", "#f4f1e0"),
@@ -27,10 +31,6 @@ tabWaterDynamicUI <- function(id) {
     ),
     column(
       9,
-      tags$style(
-        type = "text/css",
-        "#tabWaterDynamic-map {height: calc(100vh - 80px) !important;}"
-      ),
       withSpinner(
         leafletOutput(ns("map"),
           height = 700,

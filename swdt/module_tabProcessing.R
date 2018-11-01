@@ -10,12 +10,16 @@ tabProcessingUI <- function(id) {
         bsplus::bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bsplus::bs_append(
           title = "Help",
-          content = shiny::includeMarkdown("help/help_tabProcessing.md")
-        ),
-      shiny::tags$script(shiny::HTML(
-        glue::glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")
-      )),
-      shinyWidgets::panel(
+          show = FALSE,
+          content = shiny::includeHTML(
+            suppressWarnings(
+              render('help/help_tabProcessing.md', 
+                   html_document(template = 'pandoc_template.html'),
+                   quiet = TRUE)
+              )
+            )
+          ),
+      panel(
         heading = "Filter",
         shiny::uiOutput(ns("date_range")),
         shiny::div(
@@ -49,22 +53,22 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
   files <- shiny::reactive({
     #' Creates data table with available Sentinel-1 scenes
     #'
-    files <- list.files(tabAOIInput()$image_path(), "^S1")
+    files <- list.files(tabAOIInput()$image_path(), "^S1.*\\.tif$")
     paths <- list.files(tabAOIInput()$image_path(),
-                        "^S1",
-                        full.names = TRUE
+      "^S1.*\\.tif$",
+      full.names = TRUE
     )
-    thumbs <- list.files(tabAOIInput()$thumb_path(), "^S1")
+    thumbs <- list.files(tabAOIInput()$thumb_path(), "^S1.*\\.png$")
     thumbs <-
       stringr::str_sub(tabAOIInput()$thumb_path(), 7) %>%
       paste0("/", thumbs)
     
     tibble::as_tibble(files) %>%
       tidyr::separate(value,
-                      c("Mission", "Mode", "E", "Date", "Polarisation"),
-                      "_+",
-                      extra = "drop",
-                      fill = "right"
+        c("Mission", "Mode", "E", "Date", "Polarisation"),
+        "_+",
+        extra = "drop",
+        fill = "right"
       ) %>%
       dplyr::select(-one_of("E")) %>%
       mutate(Date = str_sub(Date, 1, 8)) %>%
@@ -101,10 +105,10 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     start_date(min_date)
     
     shiny::dateRangeInput(session$ns("date_range"),
-                          label = "Date Range",
-                          start = isolate(start_date()),
-                          end = isolate(end_date()),
-                          language = "de"
+      label = "Date Range",
+      start = isolate(start_date()),
+      end = isolate(end_date()),
+      language = "de"
     )
   })
   
@@ -196,12 +200,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       raster::projectRaster(crs = crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ")) %>%
       raster::extent()
     
-    glue::glue(
-      "[[", extent_raster@ymin,
-      ", ", extent_raster@xmin,
-      "], [", extent_raster@ymax, ", ",
-      extent_raster@xmax, "]]"
-    )
+    c(extent_raster@ymin, extent_raster@xmin, extent_raster@ymax, extent_raster@xmax)
   })
   
   output$map <- leaflet::renderLeaflet({
@@ -217,19 +216,18 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     if (is.null(input$table_row_last_clicked)) {
       map
     } else {
-      r <-
+      png <-
         files() %>%
         slice(input$table_row_last_clicked) %>%
         dplyr::select(thumbs) %>%
         pull()
-      
       map %>%
-        htmlwidgets::onRender(paste0("function(el, x) {
-                                 var map = this;
-                                 var imageUrl = \'", r, "\';
-                                 var imageBounds = ", thumb_extent(), ";
-                                 L.imageOverlay(imageUrl, imageBounds).addTo(map);
-    }"))
+        htmlwidgets::onRender("function(el, x, data) {
+          var map = this;
+          var imageUrl = data.png;
+          var imageBounds = [[data.thumb_extent[0], data.thumb_extent[1]], [data.thumb_extent[2], data.thumb_extent[3]]];
+          L.imageOverlay(imageUrl, imageBounds).addTo(map);
+        }", data = list(png = png, thumb_extent = thumb_extent()))
     }
   })
   
@@ -301,7 +299,11 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
             ".tif"
           )
           
-          path_max <- glue::glue(
+          if(!dir.exists(dirname(path_min))) {
+            dir.create(dirname(path_min))
+          }
+
+          path_max <- glue(
             tabAOIInput()$image_path(),
             "/maximum/maximum-",
             tabAOIInput()$aoi,
@@ -314,6 +316,10 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
             ".tif"
           )
           
+          if(!dir.exists(dirname(path_max))) {
+            dir.create(dirname(path_max))
+          }
+
           if (tabAOIInput()$parallel() == "True") {
             # Parallel calculation with tsar package
             incProgress(0.2, detail = "Minimum")

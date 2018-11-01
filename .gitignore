@@ -6,5 +6,7 @@ packrat/lib*/
 swdt/data/
 Thumbs.db
 swdt/database/
-
+desktop.ini
+swdt/help/*.html
+swdt/modal/*.html
 packrat/src/

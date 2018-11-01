@@ -31,6 +31,7 @@ library(tools)
 library(plotly)
 library(RSQLite)
 library(rgdal)
+library(rmarkdown)
 
 # Source modules
 source("module_tabAOI.R")
@@ -41,25 +42,19 @@ source("thresholding.R")
 
 # User Interface
 ui <- tagList(
-  # Add custom styles
-  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
-  tags$head(tags$script(src = "lib/opacity/Control.Opacity.js")),
-  tags$head(tags$link(
-    rel = "stylesheet",
-    type = "text/css",
-    href = "lib/opacity/Control.Opacity.css"
-  )),
-  tags$head(tags$script(src = "lib/jquery/jquery-ui-1.10.3.custom.min.js")),
-  tags$head(tags$link(
-    rel = "stylesheet",
-    type = "text/css",
-    href = "lib/jquery/jquery-ui-1.10.3.custom.min.css"
-  )),
+  # Add styles
+  includeCSS("www/styles/custom.css"),
+  includeCSS("www/styles/Control.Opacity.css"),
+  includeCSS("www/styles/jquery-ui-1.10.3.custom.min.css"),
+  # Add scripts
+  includeScript("www/scripts/Control.Opacity.js"),
+  includeScript("www/scripts/jquery-ui-1.10.3.custom.min.js"),
+  includeScript("www/scripts/navigation_right.js"),
+  includeScript("www/scripts/navigation_modal.js"),
   useShinyjs(),
-  includeScript("www/nav_right.js"),
   navbarPage(
     id = "navbar",
-    theme = "bootstrap.css",
+    theme = "styles/bootstrap.css",
     "Sentinel-1 Water Dynamics Toolkit",
     tabPanel(
       title = "AOI",
@@ -92,8 +87,7 @@ ui <- tagList(
       value = "water_dynamic",
       tabWaterDynamicUI("tabWaterDynamic")
     )
-  ),
-  tags$script(src = "navigation_modal.js")
+  )
 )
 
 # Server
@@ -168,8 +162,8 @@ server <- function(input, output, session) {
   )
 
   observe({
-    #' Restrict access to tabs if content is missing
-    #'
+    #' Restrict access to tabs
+    #' 
     if (is.null(tabAOIOutput()$uuid())) {
       shinyjs::disable(selector = "#navbar li a[data-value=processing]")
     } else {
@@ -196,6 +190,9 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$nav_processing, {
+    #' Show modal if processing tab is unavailable
+    #' Javascript: /www/scripts/navigation_modal.js
+    #' 
     if (is.null(tabAOIOutput()$uuid())) {
       showModal(
         modalDialog("No aoi selected.")
@@ -204,6 +201,9 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$nav_water_extent_minimum, {
+    #' Show modal if water extent minimum tab is unavailable
+    #' Javascript: /www/scripts/navigation_modal.js
+    #'  
     if (is.null(tabProcessingOutput()$temporal_statistics$minimum)) {
       showModal(
         modalDialog("No processing executed.")
@@ -212,6 +212,9 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$nav_water_extent_maximum, {
+    #' Show modal if water extent maximum tab is unavailable
+    #' Javascript: /www/scripts/navigation_modal.js
+    #'  
     if (is.null(tabWaterExtentMinimumOutput()$water_extent)) {
       showModal(
         modalDialog("No minimum water extent calculated.")
@@ -220,6 +223,9 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$nav_water_dynamic, {
+    #' Show modal if water dynamic tab is unavailable
+    #' Javascript: /www/scripts/navigation_modal.js
+    #'  
     if (is.null(tabWaterExtentMaximumOutput()$water_extent)) {
       showModal(
         modalDialog("No maximum water extent calculated.")
@@ -229,29 +235,49 @@ server <- function(input, output, session) {
   
   observeEvent(input$nav_about, {
     #' Show about modal
+    #' Javascript: /www/scripts/navigation_right.js
+    #' 
     showModal(
-      modalDialog(shiny::includeMarkdown("modal/tab_about.md"), size = "l")
+      modalDialog(shiny::includeHTML(
+        suppressWarnings(
+          render('modal/tab_about.md', 
+               html_document(template = 'pandoc_template.html'), quiet = TRUE))
+        ), 
+        size = "l")
     )
   })
   
   observeEvent(input$nav_imprint, {
     #' Show imprint modal
+    #' Javascript: /www/scripts/navigation_right.js
     #'
     showModal(
-      modalDialog(shiny::includeMarkdown("modal/tab_imprint.md"), size = "l")
+      modalDialog(shiny::includeHTML(
+        suppressWarnings(
+          render('modal/tab_imprint.md', 
+               html_document(template = 'pandoc_template.html'), quiet = TRUE))
+        ), 
+        size = "l")
     )
   })
   
   observeEvent(input$nav_data_protection, {
     #' Show data protrection modal
+    #' Javascript: /www/scripts/navigation_right.js
     #' 
     showModal(
-      modalDialog(shiny::includeMarkdown("modal/tab_data_protection.md"), size = "l")
+      modalDialog(shiny::includeHTML(
+        suppressWarnings(
+          render('modal/tab_data_protection.md', 
+               html_document(template = 'pandoc_template.html'), quiet = TRUE))
+        ), 
+        size = "l")
     )
   })
   
   observeEvent(input$restart_session, {
     #' Restart session
+    #' 
     session$reload()
   })
 }
