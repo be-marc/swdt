@@ -253,7 +253,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
         con <- dbConnect(RSQLite::SQLite(),
           dbname = "./database/swdt.sqlite"
         )
-        browser()
+
         # Create table if missing
         if (length(dbListTables(con)) == 0) {
           dbGetQuery(con, "CREATE TABLE temporal_statistic(
@@ -265,7 +265,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
                              path_min TEXT,
                              path_max TEXT)")
         }
-        browser()
+
         # Search for cached data
         res <- dbGetQuery(con, glue(
           "SELECT * FROM temporal_statistic WHERE start_time = \'",
