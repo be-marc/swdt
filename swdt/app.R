@@ -31,6 +31,7 @@ library(tools)
 library(plotly)
 library(RSQLite)
 library(rgdal)
+library(rmarkdown)
 
 # Source modules
 source("module_tabAOI.R")
