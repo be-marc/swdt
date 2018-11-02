@@ -69,7 +69,7 @@ tabAOI <- function(input, output, session, config, app_session) {
         shiny::showModal(
           shiny::modalDialog(glue(
             "No valid path in configuration file for aoi ",
-            glue::collapse(false_names, ",", last = " and ")
+            glue::glue_collapse(false_names, ",", last = " and ")
           ))
         )
       }
