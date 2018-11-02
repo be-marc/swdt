@@ -1,187 +1,189 @@
 # User interface
 tabAOIUI <- function(id) {
   # Create a namespace
-  ns <- NS(id)
+  ns <- shiny::NS(id)
 
-  fluidRow(
-    column(
+  shiny::fluidRow(
+    shiny::column(
       3,
-      bs_accordion(id = glue("help_text_", id)) %>%
-        bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
-        bs_append(
+      bsplus::bs_accordion(id = glue("help_text_", id)) %>%
+        bsplus::bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
+        bsplus::bs_append(
           title = "Help",
           content = shiny::includeHTML(
             suppressWarnings(
-              render('help/help_tabAOI.md', 
-                   html_document(template = 'pandoc_template.html'), 
-                   quiet = TRUE)
+              rmarkdown::render("help/help_tabAOI.md",
+                                rmarkdown::html_document(
+                                  template = paste0(getwd(), "/template/pandoc_template.html")),
+                quiet = TRUE
               )
             )
+          )
         ),
-      panel(
+      shinyWidgets::panel(
         heading = "AOI",
         uiOutput(ns("aoi")),
         actionButton(ns("start_session"), "Start Session"),
         actionButton(ns("restart_session"), "Restart Session")
       )
     ),
-    column(
+    shiny::column(
       9,
-      leafletOutput(ns("map"), height = 700, width = "100%")
+      leaflet::leafletOutput(ns("map"), height = 700, width = "100%")
     )
   )
 }
 
 # Server
 tabAOI <- function(input, output, session, config, app_session) {
-  observe({
+  shiny::observe({
     shinyjs::disable("restart_session")
   })
 
   aoi_data <- reactiveVal(NULL)
-  
-  observe({ 
+
+  shiny::observe({
     #' Check configuration file
     #'
     true_config <-
       config %>%
-      filter(dir.exists(Image))
+      dplyr::filter(dir.exists(Image))
 
     false_config <-
-      suppressWarnings(setdiff(config, true_config))
-    
+      suppressWarnings(dplyr::setdiff(config, true_config))
+
     # Validation
     if (nrow(true_config) == 0) {
-      showModal(
-        modalDialog("No valid path in configuration file")
+      shiny::showModal(
+        shiny::modalDialog("No valid path in configuration file")
       )
     } else {
       aoi_data(true_config)
-      
+
       if (nrow(false_config) > 0) {
         false_names <-
           false_config %>%
           dplyr::select(Name) %>%
-          pull()
-        
-        showModal(
-          modalDialog(glue(
+          dplyr::pull()
+
+        shiny::showModal(
+          shiny::modalDialog(glue(
             "No valid path in configuration file for aoi ",
-            glue::collapse(false_names, ",", last = " and ")
+            glue::glue_collapse(false_names, ",", last = " and ")
           ))
         )
       }
     }
   })
 
-  output$aoi <- renderUI({ 
+  output$aoi <- shiny::renderUI({
     #' Render aoi selection
     #'
     if (is.null(aoi_data())) {
       shinyjs::disable("start_session")
     }
-    req(aoi_data())
-    selectInput(session$ns("aoi"),
+    shiny::req(aoi_data())
+    shiny::selectInput(session$ns("aoi"),
       choices = aoi_data()$Name,
       label = NULL,
       selected = aoi_data()$Name[1]
     )
   })
 
-  uuid <- reactiveVal(NULL)
-  image_path <- reactiveVal(NULL)
-  shape_path <- reactiveVal(NULL)
-  thumb_path <- reactiveVal(NULL)
-  parallel <- reactiveVal(NULL)
+  uuid <- shiny::reactiveVal(NULL)
+  image_path <- shiny::reactiveVal(NULL)
+  shape_path <- shiny::reactiveVal(NULL)
+  thumb_path <- shiny::reactiveVal(NULL)
+  parallel <- shiny::reactiveVal(NULL)
 
-  observeEvent(input$start_session, { 
+  shiny::observeEvent(input$start_session, {
     #' Starts Session
     #'
-    req(input$aoi)
+    shiny::req(input$aoi)
     shinyjs::disable("aoi")
     shinyjs::disable("start_session")
 
     input$aoi %>%
-      glue("-", UUIDgenerate()) %>%
+      glue("-", uuid::UUIDgenerate()) %>%
       uuid()
 
     aoi_data() %>%
-      filter(Name == input$aoi) %>%
+      dplyr::filter(Name == input$aoi) %>%
       dplyr::select(Image) %>%
-      pull() %>%
+      dplyr::pull() %>%
       image_path()
 
     aoi_data() %>%
-      filter(Name == input$aoi) %>%
+      dplyr::filter(Name == input$aoi) %>%
       dplyr::select(Shape) %>%
-      pull() %>%
+      dplyr::pull() %>%
       shape_path()
 
     aoi_data() %>%
-      filter(Name == input$aoi) %>%
+      dplyr::filter(Name == input$aoi) %>%
       dplyr::select(Thumb) %>%
-      pull() %>%
+      dplyr::pull() %>%
       thumb_path()
-    
+
     aoi_data() %>%
-      filter(Name == input$aoi) %>%
+      dplyr::filter(Name == input$aoi) %>%
       dplyr::select(Parallel) %>%
-      pull() %>%
-      parallel
-      
+      dplyr::pull() %>%
+      parallel()
+
     # Change to processing tab
-    updateTabsetPanel(app_session, inputId = "navbar", selected = "processing")
+    shiny::updateTabsetPanel(app_session, inputId = "navbar", selected = "processing")
 
     shinyjs::enable("restart_session")
   })
 
-  shape_aoi <- reactiveVal(NULL)
+  shape_aoi <- shiny::reactiveVal(NULL)
 
-  observeEvent(input$aoi, { 
+  shiny::observeEvent(input$aoi, {
     #' Read shapefile
     #'
-    req(input$aoi)
+    shiny::req(input$aoi)
 
     path <- aoi_data() %>%
-      filter(Name == input$aoi) %>%
+      dplyr::filter(Name == input$aoi) %>%
       dplyr::select(Shape) %>%
-      pull()
+      dplyr::pull()
 
     dsn <- dirname(path)
     layer <-
       basename(path) %>%
-      file_path_sans_ext()
+      tools::file_path_sans_ext()
 
-    readOGR(dsn, layer, verbose = FALSE) %>%
+    rgdal::readOGR(dsn, layer, verbose = FALSE) %>%
       shape_aoi()
   })
 
-  output$map <- renderLeaflet({ 
+  output$map <- renderLeaflet({
     #' Render leaflet map
     #'
-    req(input$aoi)
-    req(shape_aoi())
+    shiny::req(input$aoi)
+    shiny::req(shape_aoi())
 
 
     if (input$aoi == "NA") {
-      leaflet() %>%
-        setView(lng = 25.19, lat = 54.54, zoom = 4) %>%
-        addTiles()
+      leaflet::leaflet() %>%
+        leaflet::setView(lng = 25.19, lat = 54.54, zoom = 4) %>%
+        leaflet::addTiles()
     } else {
       shape_aoi() %>%
-        leaflet() %>%
-        addTiles() %>%
-        addPolygons(fill = FALSE, color = "#008cba")
+        leaflet::leaflet() %>%
+        leaflet::addTiles() %>%
+        leaflet::addPolygons(fill = FALSE, color = "#008cba")
     }
   })
 
-  observeEvent(input$restart_session, {
+  shiny::observeEvent(input$restart_session, {
     #' Restart session
-    #' 
+    #'
     session$reload()
   })
 
-  tabAOIOutput <- reactive({ 
+  tabAOIOutput <- shiny::reactive({
     #' Module output
     #'
     list(

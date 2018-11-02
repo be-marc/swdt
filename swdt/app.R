@@ -43,45 +43,45 @@ source("thresholding.R")
 # User Interface
 ui <- tagList(
   # Add styles
-  includeCSS("www/styles/custom.css"),
-  includeCSS("www/styles/Control.Opacity.css"),
-  includeCSS("www/styles/jquery-ui-1.10.3.custom.min.css"),
+  shiny::includeCSS("www/styles/custom.css"),
+  shiny::includeCSS("www/styles/Control.Opacity.css"),
+  shiny::includeCSS("www/styles/jquery-ui-1.10.3.custom.min.css"),
   # Add scripts
-  includeScript("www/scripts/Control.Opacity.js"),
-  includeScript("www/scripts/jquery-ui-1.10.3.custom.min.js"),
-  includeScript("www/scripts/navigation_right.js"),
-  includeScript("www/scripts/navigation_modal.js"),
-  useShinyjs(),
-  navbarPage(
+  shiny::includeScript("www/scripts/Control.Opacity.js"),
+  shiny::includeScript("www/scripts/jquery-ui-1.10.3.custom.min.js"),
+  shiny::includeScript("www/scripts/navigation_right.js"),
+  shiny::includeScript("www/scripts/navigation_modal.js"),
+  shinyjs::useShinyjs(),
+  shiny::navbarPage(
     id = "navbar",
     theme = "styles/bootstrap.css",
     "Sentinel-1 Water Dynamics Toolkit",
-    tabPanel(
+    shiny::tabPanel(
       title = "AOI",
       id = "aoi",
       value = "aoi",
       tabAOIUI("tabAOI")
     ),
-    tabPanel(
+    shiny::tabPanel(
       title = "Processing",
       id = "processing",
       value = "processing",
       tabProcessingUI("tabProcessing")
     ),
-    tabPanel(
+    shiny::tabPanel(
       title = "Water Extent Minimum ",
       id = "water_extent_minimum",
       value = "water_extent_minimum",
       tabWaterExtentUI("tabWaterExtentMinimum")
     ),
-    tabPanel(
+    shiny::tabPanel(
       title = "Water Extent Maximum",
       id = "water_extent_maximum",
       value = "water_extent_maximum",
       tabWaterExtentUI("tabWaterExtentMaximum")
     )
     ,
-    tabPanel(
+    shiny::tabPanel(
       "Water Dynamics",
       id = "water_dynamic",
       value = "water_dynamic",
@@ -93,50 +93,56 @@ ui <- tagList(
 # Server
 server <- function(input, output, session) {
   read_config <- function() {
-    xml <- read_xml("./config.xml")
+    xml <- xml2::read_xml("./config.xml")
     name <-
       xml %>%
-      xml_find_all("//aoi/name") %>%
-      xml_text()
+      xml2::xml_find_all("//aoi/name") %>%
+      xml2::xml_text()
 
     image <-
       xml %>%
-      xml_find_all("//aoi/images") %>%
-      xml_text()
+      xml2::xml_find_all("//aoi/images") %>%
+      xml2::xml_text()
 
     shape <-
       xml %>%
-      xml_find_all("//aoi/shape") %>%
-      xml_text()
+      xml2::xml_find_all("//aoi/shape") %>%
+      xml2::xml_text()
 
     thumb <-
       xml %>%
-      xml_find_all("//aoi/thumbs") %>%
-      xml_text()
-    
+      xml2::xml_find_all("//aoi/thumbs") %>%
+      xml2::xml_text()
+
     parallel <-
       xml %>%
-      xml_find_all("//aoi/parallel") %>%
-      xml_text()
+      xml2::xml_find_all("//aoi/parallel") %>%
+      xml2::xml_text()
 
-    return(tibble(Name = name, Image = image, Shape = shape, Thumb = thumb, Parallel = parallel))
+    tibble::tibble(
+      Name = name,
+      Image = image,
+      Shape = shape,
+      Thumb = thumb,
+      Parallel = parallel
+    )
   }
 
   # Modules
-  tabAOIOutput <- callModule(tabAOI,
+  tabAOIOutput <- shiny::callModule(tabAOI,
     "tabAOI",
     config = read_config(),
     app_session = session
   )
 
-  tabProcessingOutput <- callModule(
+  tabProcessingOutput <- shiny::callModule(
     tabProcessing,
     "tabProcessing",
     tabAOIOutput,
     app_session = session
   )
 
-  tabWaterExtentMinimumOutput <- callModule(
+  tabWaterExtentMinimumOutput <- shiny::callModule(
     tabWaterExtent,
     "tabWaterExtentMinimum",
     tabAOIOutput,
@@ -144,7 +150,7 @@ server <- function(input, output, session) {
     mode = "minimum"
   )
 
-  tabWaterExtentMaximumOutput <- callModule(
+  tabWaterExtentMaximumOutput <- shiny::callModule(
     tabWaterExtent,
     "tabWaterExtentMaximum",
     tabAOIOutput,
@@ -152,7 +158,7 @@ server <- function(input, output, session) {
     mode = "maximum"
   )
 
-  tabWaterDynamicOutput <- callModule(
+  tabWaterDynamicOutput <- shiny::callModule(
     tabWaterDynamic,
     "tabWaterDynamic",
     tabAOIOutput,
@@ -161,9 +167,9 @@ server <- function(input, output, session) {
     tabWaterExtentMaximumOutput
   )
 
-  observe({
+  shiny::observe({
     #' Restrict access to tabs
-    #' 
+    #'
     if (is.null(tabAOIOutput()$uuid())) {
       shinyjs::disable(selector = "#navbar li a[data-value=processing]")
     } else {
@@ -189,13 +195,13 @@ server <- function(input, output, session) {
     }
   })
 
-  observeEvent(input$nav_processing, {
+  shiny::observeEvent(input$nav_processing, {
     #' Show modal if processing tab is unavailable
     #' Javascript: /www/scripts/navigation_modal.js
-    #' 
+    #'
     if (is.null(tabAOIOutput()$uuid())) {
-      showModal(
-        modalDialog("No aoi selected.")
+      shiny::showModal(
+        shiny::modalDialog("No aoi selected.")
       )
     }
   })
@@ -203,10 +209,10 @@ server <- function(input, output, session) {
   observeEvent(input$nav_water_extent_minimum, {
     #' Show modal if water extent minimum tab is unavailable
     #' Javascript: /www/scripts/navigation_modal.js
-    #'  
+    #'
     if (is.null(tabProcessingOutput()$temporal_statistics$minimum)) {
-      showModal(
-        modalDialog("No processing executed.")
+      shiny::showModal(
+        shiny::modalDialog("No processing executed.")
       )
     }
   })
@@ -214,10 +220,10 @@ server <- function(input, output, session) {
   observeEvent(input$nav_water_extent_maximum, {
     #' Show modal if water extent maximum tab is unavailable
     #' Javascript: /www/scripts/navigation_modal.js
-    #'  
+    #'
     if (is.null(tabWaterExtentMinimumOutput()$water_extent)) {
-      showModal(
-        modalDialog("No minimum water extent calculated.")
+      shiny::showModal(
+        shiny::modalDialog("No minimum water extent calculated.")
       )
     }
   })
@@ -225,62 +231,83 @@ server <- function(input, output, session) {
   observeEvent(input$nav_water_dynamic, {
     #' Show modal if water dynamic tab is unavailable
     #' Javascript: /www/scripts/navigation_modal.js
-    #'  
+    #'
     if (is.null(tabWaterExtentMaximumOutput()$water_extent)) {
-      showModal(
-        modalDialog("No maximum water extent calculated.")
+      shiny::showModal(
+        shiny::modalDialog("No maximum water extent calculated.")
       )
     }
   })
-  
-  observeEvent(input$nav_about, {
+
+  shiny::observeEvent(input$nav_about, {
     #' Show about modal
     #' Javascript: /www/scripts/navigation_right.js
-    #' 
-    showModal(
-      modalDialog(shiny::includeHTML(
+    #'
+    shiny::showModal(
+      shiny::modalDialog(shiny::includeHTML(
         suppressWarnings(
-          render('modal/tab_about.md', 
-               html_document(template = 'pandoc_template.html'), quiet = TRUE))
-        ), 
-        size = "l")
+          rmarkdown::render("modal/tab_about.md",
+            rmarkdown::html_document(template = paste0(
+              getwd(),
+              "/template/pandoc_template.html"
+            )),
+            quiet = TRUE
+          )
+        )
+      ),
+      size = "l"
+      )
     )
   })
-  
-  observeEvent(input$nav_imprint, {
+
+  shiny::observeEvent(input$nav_imprint, {
     #' Show imprint modal
     #' Javascript: /www/scripts/navigation_right.js
     #'
-    showModal(
-      modalDialog(shiny::includeHTML(
+    shiny::showModal(
+      shiny::modalDialog(shiny::includeHTML(
         suppressWarnings(
-          render('modal/tab_imprint.md', 
-               html_document(template = 'pandoc_template.html'), quiet = TRUE))
-        ), 
-        size = "l")
+          rmarkdown::render("modal/tab_imprint.md",
+            rmarkdown::html_document(template = paste0(
+              getwd(),
+              "/template/pandoc_template.html"
+            )),
+            quiet = TRUE
+          )
+        )
+      ),
+      size = "l"
+      )
     )
   })
-  
-  observeEvent(input$nav_data_protection, {
+
+  shiny::observeEvent(input$nav_data_protection, {
     #' Show data protrection modal
     #' Javascript: /www/scripts/navigation_right.js
-    #' 
-    showModal(
-      modalDialog(shiny::includeHTML(
+    #'
+    shiny::showModal(
+      shiny::modalDialog(shiny::includeHTML(
         suppressWarnings(
-          render('modal/tab_data_protection.md', 
-               html_document(template = 'pandoc_template.html'), quiet = TRUE))
-        ), 
-        size = "l")
+          rmarkdown::render("modal/tab_data_protection.md",
+            rmarkdown::html_document(template = paste0(
+              getwd(),
+              "/template/pandoc_template.html"
+            )),
+            quiet = TRUE
+          )
+        )
+      ),
+      size = "l"
+      )
     )
   })
-  
-  observeEvent(input$restart_session, {
+
+  shiny::observeEvent(input$restart_session, {
     #' Restart session
-    #' 
+    #'
     session$reload()
   })
 }
 
 # Run the application
-shinyApp(ui = ui, server = server)
+shiny::shinyApp(ui = ui, server = server)
