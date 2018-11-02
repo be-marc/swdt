@@ -237,15 +237,32 @@ tabWaterExtent <- function(input,
     if (filter) {
       updateProgress(value = 0.3, detail = "Filter")
 
-      r <- raster::focal(
-        x = r,
-        w = matrix(
-          1,
-          filter_size,
-          filter_size
-        ),
-        fun = median,
-      )
+      if (tabAOIInput()$parallel() == "True") {
+        # Apply median filter in parallel with spatial.tools package
+        sfQuickInit(cpus = 4)
+
+        # Smoother funktion
+        median_smoother <- function(inraster) {
+          smoothed <- apply(inraster, 3, median)
+          return(smoothed)
+        }
+        
+        # Run filter and convert to raster layer
+        r <- rasterEngine(inraster = r, fun = median_smoother, window_dims = c(3, 3))
+        r <- brickstack_to_raster_list(r)[[1]]
+        sfQuickStop()
+      } else {
+        # Apply median filter
+        r <- raster::focal(
+          x = r,
+          w = matrix(
+            1,
+            filter_size,
+            filter_size
+          ),
+          fun = median,
+        )
+      }
     }
 
     updateProgress(value = 0.8, detail = "Write")
