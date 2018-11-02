@@ -2,7 +2,7 @@
 tabProcessingUI <- function(id) {
   # Create a namespace
   ns <- shiny::NS(id)
-  
+
   shiny::fluidRow(
     shiny::column(
       width = 4,
@@ -13,13 +13,16 @@ tabProcessingUI <- function(id) {
           show = FALSE,
           content = shiny::includeHTML(
             suppressWarnings(
-              render('help/help_tabProcessing.md', 
-                   html_document(template = paste0(getwd(), '/template/pandoc_template.html')),
-                   quiet = TRUE)
+              rmarkdown::render(
+                "help/help_tabProcessing.md",
+                rmarkdown::html_document(
+                  template = paste0(getwd(), "/template/pandoc_template.html")),
+                quiet = TRUE
               )
             )
-          ),
-      panel(
+          )
+        ),
+      shinyWidgets::panel(
         heading = "Filter",
         shiny::uiOutput(ns("date_range")),
         shiny::div(
@@ -41,8 +44,8 @@ tabProcessingUI <- function(id) {
         "#tabProcessing-map {height: calc(100vh - 80px) !important;}"
       ),
       leaflet::leafletOutput(ns("map"),
-                             height = 700,
-                             width = "100%"
+        height = 700,
+        width = "100%"
       )
     )
   )
@@ -58,11 +61,12 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       "^S1.*\\.tif$",
       full.names = TRUE
     )
+
     thumbs <- list.files(tabAOIInput()$thumb_path(), "^S1.*\\.png$")
     thumbs <-
       stringr::str_sub(tabAOIInput()$thumb_path(), 7) %>%
       paste0("/", thumbs)
-    
+
     tibble::as_tibble(files) %>%
       tidyr::separate(value,
         c("Mission", "Mode", "E", "Date", "Polarisation"),
@@ -71,18 +75,18 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
         fill = "right"
       ) %>%
       dplyr::select(-one_of("E")) %>%
-      mutate(Date = str_sub(Date, 1, 8)) %>%
-      mutate(Date = as.Date(Date, "%Y%m%d")) %>%
+      dplyr::mutate(Date = str_sub(Date, 1, 8)) %>%
+      dplyr::mutate(Date = as.Date(Date, "%Y%m%d")) %>%
       cbind(files) %>%
       cbind(paths) %>%
       cbind(thumbs) %>%
       dplyr::mutate_if(is.factor, as.character) %>%
-      arrange(Date)
+      dplyr::arrange(Date)
   })
-  
+
   start_date <- shiny::reactiveVal()
   end_date <- shiny::reactiveVal()
-  
+
   output$date_range <- shiny::renderUI({
     #' Render date range input
     #'
@@ -90,20 +94,20 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     max_date <-
       files() %>%
       dplyr::select(Date) %>%
-      filter(Date == max(Date)) %>%
-      pull()
-    
-    month(max_date) <- month(max_date) + 1
-    day(max_date) <- 1
+      dplyr::filter(Date == max(Date)) %>%
+      dplyr::pull()
+
+    lubridate::month(max_date) <- lubridate::month(max_date) + 1
+    lubridate::day(max_date) <- 1
     max_date <- max_date - 1
-    
+
     end_date(max_date)
-    
+
     min_date <- max_date
-    day(min_date) <- 1
-    
+    lubridate::day(min_date) <- 1
+
     start_date(min_date)
-    
+
     shiny::dateRangeInput(session$ns("date_range"),
       label = "Date Range",
       start = isolate(start_date()),
@@ -111,40 +115,40 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       language = "de"
     )
   })
-  
+
   shiny::observeEvent(input$current_month, {
     #' Set date range to current month
     #'
     date <- Sys.Date()
-    day(date) <- 1
+    lubridate::day(date) <- 1
     start_date(date)
-    
-    month(date) <- month(date) + 1
+
+    lubridate::month(date) <- lubridate::month(date) + 1
     end_date(date - 1)
   })
-  
+
   shiny::observeEvent(input$last_month, {
     #' Set date range to last month
     #'
     date <- Sys.Date()
-    day(date) <- 1
-    month(date) <- month(date) - 1
+    lubridate::day(date) <- 1
+    lubridate::month(date) <- lubridate::month(date) - 1
     start_date(date)
-    
-    month(date) <- month(date) + 1
+
+    lubridate::month(date) <- lubridate::month(date) + 1
     end_date(date - 1)
   })
-  
+
   shiny::observe({
     #' Update date range
     #'
     shiny::updateDateRangeInput(session,
-                                "date_range",
-                                start = start_date(),
-                                end = end_date()
+      "date_range",
+      start = start_date(),
+      end = end_date()
     )
   })
-  
+
   shiny::observeEvent(input$date_range, {
     #' Validate date range input
     #'
@@ -154,26 +158,26 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       )
       # Cannot updated by observe function because reactiveVal does not change
       shiny::updateDateRangeInput(session,
-                                  "date_range",
-                                  start = isolate(start_date()),
-                                  end = isolate(end_date())
+        "date_range",
+        start = isolate(start_date()),
+        end = isolate(end_date())
       )
     } else {
       start_date(input$date_range[1])
       end_date(input$date_range[2])
     }
   })
-  
+
   output$table <- DT::renderDT({
     #' Render table with available Sentinel-1 scenes
     #'
     req(start_date())
     req(end_date())
-    
+
     files() %>%
       dplyr::select("Mission", "Mode", "Date") %>%
-      filter(Date > start_date()) %>%
-      filter(Date < end_date())
+      dplyr::filter(Date > start_date()) %>%
+      dplyr::filter(Date < end_date())
   },
   style = "bootstrap",
   server = TRUE, selection = "single",
@@ -186,41 +190,41 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     bAutoWidth = 1
   )
   )
-  
+
   thumb_extent <- shiny::reactive({
     #' Get raster extent for thumbs
     #'
     req(files())
-    
+
     extent_raster <- files() %>%
       slice(1) %>%
       dplyr::select(paths) %>%
-      pull() %>%
+      dplyr::pull() %>%
       raster::raster() %>%
       raster::projectRaster(crs = crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ")) %>%
       raster::extent()
-    
+
     c(extent_raster@ymin, extent_raster@xmin, extent_raster@ymax, extent_raster@xmax)
   })
-  
+
   output$map <- leaflet::renderLeaflet({
     #' Render leaflet ouput
     #'
     map <-
       tabAOIInput()$shape_aoi() %>%
-      leaflet() %>%
-      addTiles() %>%
-      addPolygons(fill = FALSE, color = "#008cba")
-    
+      leaflet::leaflet() %>%
+      leaflet::addTiles() %>%
+      leaflet::addPolygons(fill = FALSE, color = "#008cba")
+
     # Add Senintel-1 raster file
     if (is.null(input$table_row_last_clicked)) {
       map
     } else {
       png <-
         files() %>%
-        slice(input$table_row_last_clicked) %>%
+        dplyr::slice(input$table_row_last_clicked) %>%
         dplyr::select(thumbs) %>%
-        pull()
+        dplyr::pull()
       map %>%
         htmlwidgets::onRender("function(el, x, data) {
           var map = this;
@@ -230,9 +234,9 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
         }", data = list(png = png, thumb_extent = thumb_extent()))
     }
   })
-  
+
   temporal_statistics <- shiny::reactiveValues(minimum = NULL, maximum = NULL)
-  
+
   shiny::observeEvent(input$calculate, {
     #' Calculate minium and maximum backscatter raster files from time series
     #' Searches for cached data in sqlite database
@@ -242,19 +246,19 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       message = "Calculation",
       detail = "Searching",
       value = 0, {
-        
+
         # Create database folder
         if (!dir.exists("./database")) {
           dir.create("./database")
         }
-        
+
         # Conntect to data base
-        con <- dbConnect(RSQLite::SQLite(),
-                         dbname = "./database/swdt.sqlite"
+        con <- DBI::dbConnect(RSQLite::SQLite(),
+          dbname = "./database/swdt.sqlite"
         )
-        
+
         # Create table if missing
-        if (length(dbListTables(con)) == 0) {
+        if (length(DBI::dbListTables(con)) == 0) {
           DBI::dbGetQuery(con, "CREATE TABLE temporal_statistic(
                              id INTEGER PRIMARY KEY NOT NULL,
                              aoi TEXT,
@@ -264,9 +268,9 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
                              path_min TEXT,
                              path_max TEXT)")
         }
-        
+
         # Search for cached data
-        res <- DBI::dbGetQuery(con, glue(
+        res <- DBI::dbGetQuery(con, glue::glue(
           "SELECT * FROM temporal_statistic WHERE start_time = \'",
           strftime(start_date(), "%Y-%m-%dT%H:%M:%S%z"),
           "\' AND end_time = \'",
@@ -275,17 +279,17 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
           tabAOIInput()$aoi,
           "\'"
         ))
-        
+
         # Calculate, no cached data
         if (nrow(res) == 0) {
           s <-
             files() %>%
-            filter(Date > start_date()) %>%
-            filter(Date < end_date()) %>%
+            dplyr::filter(Date > start_date()) %>%
+            dplyr::filter(Date < end_date()) %>%
             dplyr::select("paths") %>%
-            pull() %>%
+            dplyr::pull() %>%
             raster::stack()
-          
+
           path_min <- glue::glue(
             tabAOIInput()$image_path(),
             "/minimum/minimum_",
@@ -298,12 +302,12 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
             strftime(end_date(), "%Y-%m-%d"),
             ".tif"
           )
-          
-          if(!dir.exists(dirname(path_min))) {
+
+          if (!dir.exists(dirname(path_min))) {
             dir.create(dirname(path_min))
           }
 
-          path_max <- glue(
+          path_max <- glue::glue(
             tabAOIInput()$image_path(),
             "/maximum/maximum-",
             tabAOIInput()$aoi,
@@ -315,71 +319,71 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
             strftime(end_date(), "%Y-%m-%d"),
             ".tif"
           )
-          
-          if(!dir.exists(dirname(path_max))) {
+
+          if (!dir.exists(dirname(path_max))) {
             dir.create(dirname(path_max))
           }
 
           if (tabAOIInput()$parallel() == "True") {
             # Parallel calculation with tsar package
-            incProgress(0.2, detail = "Minimum")
-            
+            shiny::incProgress(0.2, detail = "Minimum")
+
             tsar::tsar(s,
-                       workers = list(minimum = function(x) return(min(x, na.rm = T))),
-                       cores = 4,
-                       out.name = path_min,
-                       out.bandnames = NULL,
-                       out.dtype = "FLT4S",
-                       separate = FALSE,
-                       na.in = NA,
-                       na.out = -999,
-                       overwrite = TRUE,
-                       verbose = FALSE,
-                       nodelist = NULL,
-                       bandorder = "BSQ",
-                       maxmemory = 1000,
-                       compress_tif = F
+              workers = list(minimum = function(x) return(min(x, na.rm = T))),
+              cores = 4,
+              out.name = path_min,
+              out.bandnames = NULL,
+              out.dtype = "FLT4S",
+              separate = FALSE,
+              na.in = NA,
+              na.out = -999,
+              overwrite = TRUE,
+              verbose = FALSE,
+              nodelist = NULL,
+              bandorder = "BSQ",
+              maxmemory = 1000,
+              compress_tif = F
             )
-            
-            temporal_statistics[["minimum"]] <- raster(path_min)
-            
+
+            temporal_statistics[["minimum"]] <- raster::raster(path_min)
+
             shiny::incProgress(0.6, detail = "Maximum")
-            
+
             tsar::tsar(s,
-                       workers = list(maximum = function(x) return(max(x, na.rm = T))),
-                       cores = 4,
-                       out.name = path_max,
-                       out.bandnames = NULL,
-                       out.dtype = "FLT4S",
-                       separate = FALSE,
-                       na.in = NA,
-                       na.out = -999,
-                       overwrite = TRUE,
-                       verbose = FALSE,
-                       nodelist = NULL,
-                       bandorder = "BSQ",
-                       maxmemory = 1000,
-                       compress_tif = F
+              workers = list(maximum = function(x) return(max(x, na.rm = T))),
+              cores = 4,
+              out.name = path_max,
+              out.bandnames = NULL,
+              out.dtype = "FLT4S",
+              separate = FALSE,
+              na.in = NA,
+              na.out = -999,
+              overwrite = TRUE,
+              verbose = FALSE,
+              nodelist = NULL,
+              bandorder = "BSQ",
+              maxmemory = 1000,
+              compress_tif = F
             )
-            
+
             temporal_statistics[["maximum"]] <- raster::raster(path_max)
           } else {
             # Calculation with raster package
-            incProgress(0.2, detail = "Minimum")
-            
+            shiny::incProgress(0.2, detail = "Minimum")
+
             r_minimum <- calc(s, min)
             temporal_statistics[["minimum"]] <- r_minimum
-            writeRaster(r_minimum, path_min, overwrite = TRUE)
-            
-            incProgress(0.6, detail = "Maximum")
-            
+            raster::writeRaster(r_minimum, path_min, overwrite = TRUE)
+
+            shiny::incProgress(0.6, detail = "Maximum")
+
             r_maximum <- calc(s, max)
             temporal_statistics[["maximum"]] <- r_maximum
             raster::writeRaster(r_maximum, path_max, overwrite = TRUE)
           }
-          
+
           # Write to database
-          DBI::dbGetQuery(con, glue(
+          DBI::dbGetQuery(con, glue::glue(
             "INSERT INTO temporal_statistic (
                              aoi,
                              creation_date,
@@ -402,23 +406,23 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
           ))
         } else { # Cached data available
           shiny::incProgress(0.5, detail = "Data in cache")
-          
+
           r_minimum <-
             res %>%
             dplyr::select(path_min) %>%
-            slice(1) %>%
-            pull() %>%
+            dplyr::slice(1) %>%
+            dplyr::pull() %>%
             raster::raster()
-          
+
           temporal_statistics[["minimum"]] <- r_minimum
-          
+
           r_maximum <-
             res %>%
             dplyr::select(path_max) %>%
-            slice(1) %>%
-            pull() %>%
+            dplyr::slice(1) %>%
+            dplyr::pull() %>%
             raster::raster()
-          
+
           temporal_statistics[["maximum"]] <- r_maximum
         }
       }
@@ -426,22 +430,22 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     shinyjs::enable("calculate")
     shiny::showModal(
       shiny::modalDialog("Minimum and maximum backscatter raster files successfully calculated.",
-                         footer = shiny::tagList(
-                           shiny::modalButton("Dismiss"),
-                           shiny::actionButton(session$ns("next_tab"), "Next")
-                         )
+        footer = shiny::tagList(
+          shiny::modalButton("Dismiss"),
+          shiny::actionButton(session$ns("next_tab"), "Next")
+        )
       )
     )
   })
-  
+
   shiny::observeEvent(input$next_tab, {
     #' Change to water extent tab after calculation
     #'
     shiny::removeModal()
     shiny::updateTabsetPanel(app_session, inputId = "navbar", selected = "water_extent_minimum")
   })
-  
-  tabProcessingOutput <- reactive({
+
+  tabProcessingOutput <- shiny::reactive({
     #' Module ouput
     #'
     list(
@@ -450,6 +454,6 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       end_date = end_date
     )
   })
-  
+
   return(tabProcessingOutput)
 }
