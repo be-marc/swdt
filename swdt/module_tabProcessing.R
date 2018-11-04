@@ -52,7 +52,13 @@ tabProcessingUI <- function(id) {
 }
 
 # Server
-tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
+tabProcessing <- function(input, 
+                          output, 
+                          session, 
+                          tabAOIInput, 
+                          tabWaterExtentMinimumInput,
+                          tabWaterExtentMaximumInput, 
+                          app_session) {
   files <- shiny::reactive({
     #' Creates data table with available Sentinel-1 scenes
     #'
@@ -236,12 +242,17 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
   })
 
   temporal_statistics <- shiny::reactiveValues(minimum = NULL, maximum = NULL)
+  clear_data <- reactiveVal(0)
 
   shiny::observeEvent(input$calculate, {
     #' Calculate minium and maximum backscatter raster files from time series
     #' Searches for cached data in sqlite database
     #'
     shinyjs::disable("calculate")
+    if(!is.null(tabWaterExtentMinimumInput()$water_extent())) {
+      clear_data(clear_data() + 1)
+    }
+    
     shiny::withProgress(
       message = "Calculation",
       detail = "Searching",
@@ -451,7 +462,8 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     list(
       temporal_statistics = temporal_statistics,
       start_date = start_date,
-      end_date = end_date
+      end_date = end_date,
+      clear_data = clear_data()
     )
   })
 

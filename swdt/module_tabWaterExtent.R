@@ -286,7 +286,7 @@ tabWaterExtent <- function(input,
       raster::stretch(minq = 0.05, maxq = 0.95)
   })
 
-
+  
   output$map <- leaflet::renderLeaflet({
     #' Render leaflet ouput
     #'
@@ -455,7 +455,7 @@ tabWaterExtent <- function(input,
     #' Module ouput
     #'
     list(
-      water_extent = water_extent(),
+      water_extent = water_extent,
       threshold = pass_threshold,
       filter = input$filter,
       filter_size = pass_filter_size

@@ -58,8 +58,8 @@ tabWaterDynamic <- function(input,
     #'
     shiny::withProgress(message = "Classification", value = 0, {
       raster::stack(
-        tabWaterExtentMinimumInput()$water_extent,
-        tabWaterExtentMaximumInput()$water_extent
+        tabWaterExtentMinimumInput()$water_extent(),
+        tabWaterExtentMaximumInput()$water_extent()
       ) %>%
         raster::calc(sum) %>%
         raster::reclassify(c(-Inf, 0, 0, 0, 1, 1, 2, Inf, 2))

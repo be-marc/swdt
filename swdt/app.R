@@ -139,6 +139,8 @@ server <- function(input, output, session) {
     tabProcessing,
     "tabProcessing",
     tabAOIOutput,
+    tabWaterExtentMinimumOutput,
+    tabWaterExtentMaximumOutput,
     app_session = session
   )
 
@@ -182,13 +184,13 @@ server <- function(input, output, session) {
       shinyjs::enable(selector = "#navbar li a[data-value=\"water_extent_minimum\"]")
     }
 
-    if (is.null(tabWaterExtentMinimumOutput()$water_extent)) {
+    if (is.null(tabWaterExtentMinimumOutput()$water_extent())) {
       shinyjs::disable(selector = "#navbar li a[data-value=\"water_extent_maximum\"]")
     } else {
       shinyjs::enable(selector = "#navbar li a[data-value=\"water_extent_maximum\"]")
     }
 
-    if (is.null(tabWaterExtentMaximumOutput()$water_extent)) {
+    if (is.null(tabWaterExtentMaximumOutput()$water_extent())) {
       shinyjs::disable(selector = "#navbar li a[data-value=\"water_dynamic\"]")
     } else {
       shinyjs::enable(selector = "#navbar li a[data-value=\"water_dynamic\"]")
@@ -221,7 +223,7 @@ server <- function(input, output, session) {
     #' Show modal if water extent maximum tab is unavailable
     #' Javascript: /www/scripts/navigation_modal.js
     #'
-    if (is.null(tabWaterExtentMinimumOutput()$water_extent)) {
+    if (is.null(tabWaterExtentMinimumOutput()$water_extent())) {
       shiny::showModal(
         shiny::modalDialog("No minimum water extent calculated.")
       )
@@ -232,7 +234,7 @@ server <- function(input, output, session) {
     #' Show modal if water dynamic tab is unavailable
     #' Javascript: /www/scripts/navigation_modal.js
     #'
-    if (is.null(tabWaterExtentMaximumOutput()$water_extent)) {
+    if (is.null(tabWaterExtentMaximumOutput()$water_extent())) {
       shiny::showModal(
         shiny::modalDialog("No maximum water extent calculated.")
       )
@@ -306,6 +308,15 @@ server <- function(input, output, session) {
     #' Restart session
     #'
     session$reload()
+  })
+  
+  shiny::observeEvent(tabProcessingOutput()$clear_data, {
+    #' Clear data if processing is done again
+    #' 
+    if(tabProcessingOutput()$clear_data > 0) {
+      tabWaterExtentMinimumOutput()$water_extent(NULL)
+      tabWaterExtentMaximumOutput()$water_extent(NULL)
+    }
   })
 }
 
