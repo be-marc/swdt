@@ -69,7 +69,7 @@ ui <- tagList(
       tabProcessingUI("tabProcessing")
     ),
     shiny::tabPanel(
-      title = "Water Extent Minimum ",
+      title = "Water Extent Minimum",
       id = "water_extent_minimum",
       value = "water_extent_minimum",
       tabWaterExtentUI("tabWaterExtentMinimum")
@@ -149,7 +149,7 @@ server <- function(input, output, session) {
     "tabWaterExtentMinimum",
     tabAOIOutput,
     tabProcessingOutput,
-    mode = "minimum"
+    mode = "maximum"
   )
 
   tabWaterExtentMaximumOutput <- shiny::callModule(
@@ -157,7 +157,7 @@ server <- function(input, output, session) {
     "tabWaterExtentMaximum",
     tabAOIOutput,
     tabProcessingOutput,
-    mode = "maximum"
+    mode = "minimum"
   )
 
   tabWaterDynamicOutput <- shiny::callModule(

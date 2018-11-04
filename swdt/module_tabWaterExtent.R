@@ -104,7 +104,9 @@ tabWaterExtent <- function(input,
   layer <- shiny::reactiveVal(NULL)
 
   shiny::observe({
-    #' Switch between minimum and maximum
+    #' Switch between minimum and maximum temporal statistic
+    #' Minimum temporal statistic calculates maxium water extent
+    #' Maximum temporal statistic calculates minmum water extent
     #'
     shiny::req(tabProcessingInput()$temporal_statistics$minimum)
     shiny::req(tabProcessingInput()$temporal_statistics$maximum)
