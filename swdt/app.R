@@ -57,32 +57,32 @@ ui <- tagList(
     theme = "styles/bootstrap.css",
     "Sentinel-1 Water Dynamics Toolkit",
     shiny::tabPanel(
-      title = "AOI",
+      title = "1. AOI",
       id = "aoi",
       value = "aoi",
       tabAOIUI("tabAOI")
     ),
     shiny::tabPanel(
-      title = "Processing",
+      title = "2. Processing",
       id = "processing",
       value = "processing",
       tabProcessingUI("tabProcessing")
     ),
     shiny::tabPanel(
-      title = "Water Extent Minimum",
+      title = "3. Water Extent Minimum",
       id = "water_extent_minimum",
       value = "water_extent_minimum",
       tabWaterExtentUI("tabWaterExtentMinimum")
     ),
     shiny::tabPanel(
-      title = "Water Extent Maximum",
+      title = "4. Water Extent Maximum",
       id = "water_extent_maximum",
       value = "water_extent_maximum",
       tabWaterExtentUI("tabWaterExtentMaximum")
     )
     ,
     shiny::tabPanel(
-      "Water Dynamics",
+      title = "5. Water Dynamics",
       id = "water_dynamic",
       value = "water_dynamic",
       tabWaterDynamicUI("tabWaterDynamic")
