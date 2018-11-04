@@ -30,10 +30,10 @@ tabWaterExtentUI <- function(id) {
           shiny::div(
             style = "vertical-align:bottom;",
             numericInput(ns("threshold"),
-              "Threshold",
-              value = 0,
-              width = "200px",
-              step = 0.5
+                         "Threshold",
+                         value = 0,
+                         width = "200px",
+                         step = 0.5
             )
           ),
           shiny::div(
@@ -69,8 +69,8 @@ tabWaterExtentUI <- function(id) {
         shiny::div(
           style = "display: inline-block; vertical-align:bottom; ",
           switchInput(ns("filter"),
-            label = "Filter",
-            value = FALSE
+                      label = "Filter",
+                      value = FALSE
           )
         )
       ),
@@ -115,14 +115,14 @@ tabWaterExtent <- function(input,
       layer(tabProcessingInput()$temporal_statistics$maximum)
     }
   })
-
+  
   observe({
     #' Deactivated input widgets at start
     #'
     shinyjs::disable("filter_size")
     shinyjs::disable("base_raster")
   })
-
+  
   observeEvent(input$filter, {
     #' Enable and disable filter size input
     #'
@@ -145,10 +145,10 @@ tabWaterExtent <- function(input,
       layer() %>%
       raster::as.matrix() %>%
       thres.gray()
-
+    
     # Round
     threshold <- 0.5 * round(threshold / 0.5)
-
+    
     pass_threshold(threshold)
     shiny::updateNumericInput(session, "threshold",
       value = isolate(pass_threshold())
@@ -233,7 +233,7 @@ tabWaterExtent <- function(input,
       Inf,
       1
     ))
-
+    
     if (filter) {
       updateProgress(value = 0.3, detail = "Filter")
 
@@ -247,7 +247,7 @@ tabWaterExtent <- function(input,
         fun = median,
       )
     }
-
+    
     updateProgress(value = 0.8, detail = "Write")
     return(r)
   }
@@ -261,11 +261,11 @@ tabWaterExtent <- function(input,
     # Initialize progressbar
     progress <- Progress$new()
     progress$set(message = "Classification", detail = "Get", value = 0)
-
+    
     updateProgress <- function(value = NULL, detail = NULL) {
       progress$set(value = value, detail = detail)
     }
-
+    
     # Classify raster
     r <- classify(
       layer(),
@@ -285,7 +285,6 @@ tabWaterExtent <- function(input,
     layer() %>%
       raster::stretch(minq = 0.05, maxq = 0.95)
   })
-
   
   output$map <- leaflet::renderLeaflet({
     #' Render leaflet ouput
@@ -299,7 +298,7 @@ tabWaterExtent <- function(input,
       raster::values(stretch_radar()),
       na.color = "transparent"
     )
-
+    
     # Create map
     tabAOIInput()$shape_aoi() %>%
       leaflet::leaflet() %>%
