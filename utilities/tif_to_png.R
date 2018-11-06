@@ -4,6 +4,7 @@ library(tools)
 library(raster)
 library(rgdal)
 library(glue)
+library(magrittr)
 
 # Config
 in_path <- "./swdt/data/fuente"
