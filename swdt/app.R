@@ -310,10 +310,10 @@ server <- function(input, output, session) {
     session$reload()
   })
   
-  shiny::observeEvent(tabProcessingOutput()$clear_data, {
+  shiny::observeEvent(tabProcessingOutput()$clear_data(), {
     #' Clear data if processing is done again
     #' 
-    if(tabProcessingOutput()$clear_data > 0) {
+    if(tabProcessingOutput()$clear_data() > 0) {
       tabWaterExtentMinimumOutput()$water_extent(NULL)
       tabWaterExtentMaximumOutput()$water_extent(NULL)
     }
